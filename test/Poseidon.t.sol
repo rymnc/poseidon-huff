@@ -14,6 +14,16 @@ contract PoseidonSol {
         5433650512959517612316327474713065966758808864213826738576266661723522780033;
     uint256 constant C2 =
         13641176377184356099764086973022553863760045607496549923679278773208775739952;
+    uint256 constant C3 =
+        17949713444224994136330421782109149544629237834775211751417461773584374506783;
+    uint256 constant C4 =
+        13765628375339178273710281891027109699578766420463125835325926111705201856003;
+    uint256 constant C5 =
+        19179513468172002314585757290678967643352171735526887944518845346318719730387;
+    uint256 constant C6 =
+        5157412437176756884543472904098424903141745259452875378101256928559722612176;
+    uint256 constant C7 =
+        535160875740282236955320458485730000677124519901643397458212725410971557409;
     uint256 constant M00 =
         2910766817845651019878574839501801340070030115151021261302834310722729507541;
     uint256 constant M01 =
@@ -31,6 +41,45 @@ contract PoseidonSol {
             let s1 := add(input, C1)
             // SBOX
             let t := mulmod(s0, s0, q)
+            s0 := mulmod(mulmod(t, t, q), s0, q)
+            t := mulmod(s1, s1, q)
+            s1 := mulmod(mulmod(t, t, q), s1, q)
+            // MIX
+            t := add(mulmod(s0, M00, q), mulmod(s1, M01, q))
+            s1 := add(mulmod(s0, M10, q), mulmod(s1, M11, q))
+            s0 := t
+
+            //ROUND 1 - FULL
+            s0 := add(s0, C2)
+            s1 := add(s1, C3)
+            // SBOX
+            t := mulmod(s0, s0, q)
+            s0 := mulmod(mulmod(t, t, q), s0, q)
+            t := mulmod(s1, s1, q)
+            s1 := mulmod(mulmod(t, t, q), s1, q)
+            // MIX
+            t := add(mulmod(s0, M00, q), mulmod(s1, M01, q))
+            s1 := add(mulmod(s0, M10, q), mulmod(s1, M11, q))
+            s0 := t
+
+            //ROUND 2 - FULL
+            s0 := add(s0, C4)
+            s1 := add(s1, C5)
+            // SBOX
+            t := mulmod(s0, s0, q)
+            s0 := mulmod(mulmod(t, t, q), s0, q)
+            t := mulmod(s1, s1, q)
+            s1 := mulmod(mulmod(t, t, q), s1, q)
+            // MIX
+            t := add(mulmod(s0, M00, q), mulmod(s1, M01, q))
+            s1 := add(mulmod(s0, M10, q), mulmod(s1, M11, q))
+            s0 := t
+
+            //ROUND 3 - FULL
+            s0 := add(s0, C6)
+            s1 := add(s1, C7)
+            // SBOX
+            t := mulmod(s0, s0, q)
             s0 := mulmod(mulmod(t, t, q), s0, q)
             t := mulmod(s1, s1, q)
             s1 := mulmod(mulmod(t, t, q), s1, q)

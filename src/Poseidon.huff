@@ -5,11 +5,11 @@
 #define constant C0  = 0x09c46e9ec68e9bd4fe1faaba294cba38a71aa177534cdd1b6c7dc0dbd0abd7a7
 #define constant C1  = 0x0c0356530896eec42a97ed937f3135cfc5142b3ae405b8343c1d83ffa604cb81
 #define constant C2  = 0x1e28a1d935698ad1142e51182bb54cf4a00ea5aabd6268bd317ea977cc154a30
-// #define constant C3  = 17949713444224994136330421782109149544629237834775211751417461773584374506783
-// #define constant C4  = 13765628375339178273710281891027109699578766420463125835325926111705201856003
-// #define constant C5  = 19179513468172002314585757290678967643352171735526887944518845346318719730387
-// #define constant C6  = 5157412437176756884543472904098424903141745259452875378101256928559722612176
-// #define constant C7  = 535160875740282236955320458485730000677124519901643397458212725410971557409
+#define constant C3  = 0x27af2d831a9d2748080965db30e298e40e5757c3e008db964cf9e2b12b91251f
+#define constant C4  = 0x1e6f11ce60fc8f513a6a3cfe16ae175a41291462f214cd0879aaf43545b74e03
+#define constant C5  = 0x2a67384d3bbd5e438541819cb681f0be04462ed14c3613d8f719206268d142d3
+#define constant C6  = 0x0b66fdf356093a611609f8e12fbfecf0b985e381f025188936408f5d5c9f45d0
+#define constant C7  = 0x012ee3ec1e78d470830c61093c2ade370b26c83cc5cebeeddaa6852dbdb09e21
 // #define constant C8  = 1050793453380762984940163090920066886770841063557081906093018330633089036729
 // #define constant C9  = 10665495010329663932664894101216428400933984666065399374198502106997623173873
 // #define constant C10 = 19965634623406616956648724894636666805991993496469370618546874926025059150737
@@ -135,9 +135,51 @@
 #define constant M10 = 0x0cc57cdbb08507d62bf67a4493cc262fb6c09d557013fff1f573f431221f8ff9
 #define constant M11 = 0x1274e649a32ed355a31a6ed69724e1adade857e86eb5c3a121bcd147943203c8
 
+#define macro NESTED_MULMOD() = takes(3) returns (2) {
+    // mulmod(mulmod(t, t, q), s0, q)
+    
+    // input stack [inp, s1, s0]
+    add // [s1, s0]
+    dup1 // [s1, s1, s0]
+    dup1 // [s1, s1, s1, s0]
+    [Q] // [Q, s1, s1, s1, s0]
+    swap2 // [s1, s1, Q, s1, s0]
+    mulmod // [t, s1, s0]
+    dup1 // [t, t, s1, s0]
+    [Q] // [Q, t, t, s1, s0]
+    swap2 // [t, t, Q, s1, s0]
+    mulmod // [t_i, s1, s0]
+    [Q] // [Q, t_i, s1, s0]
+    swap2 // [s1, t_i, Q, s0]
+    swap1 // [t_i, s1, Q, s0]
+    mulmod // [s1, s0]
+}
 
-#define macro MAIN() = takes (0) returns (0) {
-    // Poseidon parameters should be t = 2, RF = 8, RP = 56
+#define macro MIX() = takes(2) returns(4) {
+    // t := add(mulmod(s0, M00, q), mulmod(s1, M01, q))
+    // s1 := add(mulmod(s0, M10, q), mulmod(s1, M11, q))
+    // s0 := t
+
+    // input stack [s1, s0]
+    [Q] // [Q, s1, s0]
+    [M00] // [M00, Q, s1, s0]
+    dup4 // [s0, M00, Q, s1, s0]
+    mulmod // [t_int, s1, s0]
+    [Q] [M01] // [M01, Q, t_int, s1, s0]
+    dup4 // [s1, M01, Q, t_int, s1, s0]
+    mulmod // [t_int2, t_int, s1, s0]
+    add // [t, s1, s0]
+    [Q] // [Q, t, s1, s0]
+    [M10] // [M10, Q, t, s1, s0]
+    dup5 // [s0, M10, Q, t, s1, s0]
+    mulmod // [t_int, t, s1, s0]
+    [Q] [M11] // [M11, Q, t_int, t, s1, s0]
+    dup5 // [s1, M11, Q, t_int, t, s1, s0]
+    mulmod swap1 // [t_int, t_int2, t, s1, s0]
+    add // [s1, s0, s1(old), s0(old)]
+}
+
+#define macro FIRST_ROUND() = takes(0) returns(2) {
     [C0] // [C0 = s0]
     [C0] // [C0, C0 = s0]
     [Q] // [Q, C0, C0]
@@ -153,40 +195,55 @@
     mulmod // [s0]
     [C1] // [C1, s0]
     0x04 calldataload // [input, C1, s0]
-    add // [s1, s0]
-    dup1 // [s1, s1, s0]
-    dup1 // [s1, s1, s1, s0]
-    [Q] // [Q, s1, s1, s1, s0]
-    swap2 // [s1, s1, Q, s1, s0]
-    mulmod // [t, s1, s0]
-    dup1 // [t, t, s1, s0]
-    [Q] // [Q, t, t, s1, s0]
-    swap2 // [t, t, Q, s1, s0]
-    mulmod // [t_i, s1, s0]
-    [Q] // [Q, t_i, s1, s0]
-    swap2 // [s1, t_i, Q, s0]
-    swap1 // [t_i, s1, Q, s0]
-    mulmod // [s1, s0]
-    [Q] // [Q, s1, s0]
-    [M00] // [M00, Q, s1, s0]
-    dup4 // [s0, M00, Q, s1, s0]
-    mulmod // [t_int, s1, s0]
-    [Q] [M01] // [M01, Q, t_int, s1, s0]
-    dup4 // [s1, M01, Q, t_int, s1, s0]
-    mulmod // [t_int2, t_int, s1, s0]
-    add // [t, s1, s0]
-    
-    [Q] // [Q, t, s1, s0]
-    [M00] // [M10, Q, t, s1, s0]
-    dup5 // [s0, M10, Q, t, s1, s0]
-    mulmod // [t_int, t, s1, s0]
-    [Q] [M11] // [M11, Q, t_int, t, s1, s0]
-    dup5 // [s1, M01, Q, t_int, t, s1, s0]
-    mulmod // [t_int2, t_int, t, s1, s0]
-    add // [s1, s0, s1(old), s0(old)]
+    NESTED_MULMOD()
+    MIX()
+}
+
+#define macro CLEAN_STACK() = takes(4) returns(2) {
+    // input stack [s1, s0, s1(old), s0(old)]
+    swap2 pop swap2 pop // [s1, s0]
+}
+
+#define macro FULL_ROUND(const_a, const_b) = takes(2) returns (4) {
+    // input stack: [s1, s0]
+    // SBOX
+    swap1 // [s0, s1]
+    <const_a> // [C2, s0, s1]
+    NESTED_MULMOD()
+    swap1 // [s1, s0]
+    <const_b> // [C3, s1, s0] 
+    NESTED_MULMOD()
+    // MIX
+    MIX() // [s1, s0, s1(old), s0(old)]
+}
+
+#define macro MAIN() = takes (0) returns (0) {
+    // Poseidon parameters should be t = 2, RF = 8, RP = 56
+   
+    FIRST_ROUND() // [s1, s0, s1(old), s0(old)]
+    CLEAN_STACK()
+
+    // ROUND 1 - FULL
+    FULL_ROUND(C2, C3) // [s1, s0, s1(old), s0(old)]
+    CLEAN_STACK()
+
+    // ROUND 2 - FULL
+    FULL_ROUND(C4, C5)
+    CLEAN_STACK()
+
+    // ROUND 3 - FULL
+    FULL_ROUND(C6, C7)
+    CLEAN_STACK()
 
     // return s0 to compare with solidity impl
     pop
     0x00 mstore
     0x20 0x00 return
 }
+
+// TODOS:
+// - convert all bigints to hex encoded uint256s
+// - abstract common opcode sets into macros
+// - write partial round macro
+// - compare gas + bytecode size w/ PoseidonHasher.sol
+// - optimize to remove the CLEAN_STACK() macro
