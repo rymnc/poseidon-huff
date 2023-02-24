@@ -5,10 +5,7 @@ import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
-contract PoseidonTest is Test {
-    /// @dev Address of the Poseidon contract.
-    Poseidon public poseidon;
-
+contract PoseidonSol {
     uint256 constant Q =
         21888242871839275222246405745257275088548364400416034343698204186575808495617;
     uint256 constant C0 =
@@ -26,7 +23,7 @@ contract PoseidonTest is Test {
     uint256 constant M11 =
         8348174920934122550483593999453880006756108121341067172388445916328941978568;
 
-    function hash(uint256 input) internal pure returns (uint256 result) {
+    function hash(uint256 input) external pure returns (uint256 result) {
         assembly {
             let q := Q
             //ROUND 0 - FULL
@@ -45,15 +42,30 @@ contract PoseidonTest is Test {
             result := s0
         }
     }
+}
+
+contract PoseidonTest is Test {
+    /// @dev Address of the Poseidon contract.
+    Poseidon public poseidon;
+    PoseidonSol public poseidonSol;
 
     /// @dev Setup the testing environment.
     function setUp() public {
         poseidon = Poseidon(HuffDeployer.deploy("Poseidon"));
+        poseidonSol = new PoseidonSol();
     }
 
     /// @dev Ensure that you can hash a value.
     function testHasher(uint256 value) public {
-        assertEq(hash(value), poseidon.hash(value));
+        assertEq(poseidonSol.hash(value), poseidon.hash(value));
+    }
+
+    function testGasSolHasher(uint256 value) public {
+        poseidonSol.hash(value);
+    }
+
+    function testGasHuffHasher(uint256 value) public {
+        poseidon.hash(value);
     }
 }
 
