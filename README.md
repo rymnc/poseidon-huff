@@ -1,8 +1,8 @@
 <img align="right" width="150" height="150" top="100" src="./assets/blueprint.png">
 
-# huff-project-template • [![ci](https://github.com/huff-language/huff-project-template/actions/workflows/ci.yaml/badge.svg)](https://github.com/huff-language/huff-project-template/actions/workflows/ci.yaml) ![license](https://img.shields.io/github/license/huff-language/huff-project-template.svg) ![solidity](https://img.shields.io/badge/solidity-^0.8.15-lightgrey)
+# poseidon-huff • [![ci](https://github.com/huff-language/huff-project-template/actions/workflows/ci.yaml/badge.svg)](https://github.com/huff-language/huff-project-template/actions/workflows/ci.yaml) ![license](https://img.shields.io/github/license/huff-language/huff-project-template.svg) ![solidity](https://img.shields.io/badge/solidity-^0.8.15-lightgrey)
 
-Versatile Huff Project Template using Foundry.
+Ports [poseidon hash function](https://github.com/vacp2p/rln-contract/blob/main/contracts/PoseidonHasher.sol) to huff language
 
 
 ## Getting Started
@@ -22,18 +22,7 @@ The following will need to be installed in order to use this template. Please fo
 
 ### Quickstart
 
-1. Clone this repo or use template
-
-Click "Use this template" on [GitHub](https://github.com/huff-language/huff-project-template) to create a new repository with this repo as the initial state.
-
-Or run:
-
-```
-git clone https://github.com/huff-language/huff-project-template
-cd huff-project-template
-```
-
-2. Install dependencies
+1. Install dependencies
 
 Once you've cloned and entered into your repository, you need to install the necessary dependencies. In order to do so, simply run:
 
@@ -41,7 +30,7 @@ Once you've cloned and entered into your repository, you need to install the nec
 forge install
 ```
 
-3. Build & Test
+2. Build & Test
 
 To build and test your contracts, you can run:
 
@@ -52,20 +41,11 @@ forge test
 
 For more information on how to use Foundry, check out the [Foundry Github Repository](https://github.com/foundry-rs/foundry/tree/master/forge) and the [foundry-huff library repository](https://github.com/huff-language/foundry-huff).
 
+## Gas comparison of Huff and Solidity 
 
-## Blueprint
 
-```ml
-lib
-├─ forge-std — https://github.com/foundry-rs/forge-std
-├─ foundry-huff — https://github.com/huff-language/foundry-huff
-scripts
-├─ Deploy.s.sol — Deployment Script
-src
-├─ SimpleStore — A Simple Storage Contract in Huff
-test
-└─ SimpleStore.t — SimpleStoreTests
-```
+<img align="center" src="./assets/poseidon-huff.png">
+
 
 
 ## License
