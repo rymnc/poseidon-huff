@@ -135,8 +135,9 @@
 #define constant M10 = 0x0cc57cdbb08507d62bf67a4493cc262fb6c09d557013fff1f573f431221f8ff9
 #define constant M11 = 0x1274e649a32ed355a31a6ed69724e1adade857e86eb5c3a121bcd147943203c8
 
-#define macro NESTED_MULMOD() = takes(3) returns (2) {
-    // mulmod(mulmod(t, t, q), s0, q)
+#define macro ADD_AND_SBOX() = takes(3) returns (2) {
+    // t := mulmod(s1, s1, q)
+    // s1 := mulmod(mulmod(t, t, q), s1, q)
     
     // input stack [inp, s1, s0]
     add // [s1, s0]
@@ -195,7 +196,7 @@
     mulmod // [s0]
     [C1] // [C1, s0]
     0x04 calldataload // [input, C1, s0]
-    NESTED_MULMOD()
+    ADD_AND_SBOX()
     MIX()
 }
 
@@ -209,10 +210,10 @@
     // SBOX
     swap1 // [s0, s1]
     <const_a> // [C2, s0, s1]
-    NESTED_MULMOD()
+    ADD_AND_SBOX()
     swap1 // [s1, s0]
     <const_b> // [C3, s1, s0] 
-    NESTED_MULMOD()
+    ADD_AND_SBOX()
     // MIX
     MIX() // [s1, s0, s1(old), s0(old)]
 }
@@ -221,7 +222,7 @@
     // input stack: [s1, s0]
     swap1 // [s0, s1]
     <const_a> // [C2, s0, s1]
-    NESTED_MULMOD()
+    ADD_AND_SBOX()
     swap1 // [s1, s0]
     <const_b> // [C3, s1, s0]
     add // [s1, s0]
