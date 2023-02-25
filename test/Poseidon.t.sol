@@ -24,6 +24,10 @@ contract PoseidonSol {
         5157412437176756884543472904098424903141745259452875378101256928559722612176;
     uint256 constant C7 =
         535160875740282236955320458485730000677124519901643397458212725410971557409;
+    uint256 constant C8 =
+        1050793453380762984940163090920066886770841063557081906093018330633089036729;
+    uint256 constant C9 =
+        10665495010329663932664894101216428400933984666065399374198502106997623173873;
     uint256 constant M00 =
         2910766817845651019878574839501801340070030115151021261302834310722729507541;
     uint256 constant M01 =
@@ -83,6 +87,17 @@ contract PoseidonSol {
             s0 := mulmod(mulmod(t, t, q), s0, q)
             t := mulmod(s1, s1, q)
             s1 := mulmod(mulmod(t, t, q), s1, q)
+            // MIX
+            t := add(mulmod(s0, M00, q), mulmod(s1, M01, q))
+            s1 := add(mulmod(s0, M10, q), mulmod(s1, M11, q))
+            s0 := t
+
+            //ROUND 4 - PARTIAL
+            s0 := add(s0, C8)
+            s1 := add(s1, C9)
+            // SBOX
+            t := mulmod(s0, s0, q)
+            s0 := mulmod(mulmod(t, t, q), s0, q)
             // MIX
             t := add(mulmod(s0, M00, q), mulmod(s1, M01, q))
             s1 := add(mulmod(s0, M10, q), mulmod(s1, M11, q))

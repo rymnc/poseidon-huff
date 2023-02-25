@@ -10,8 +10,8 @@
 #define constant C5  = 0x2a67384d3bbd5e438541819cb681f0be04462ed14c3613d8f719206268d142d3
 #define constant C6  = 0x0b66fdf356093a611609f8e12fbfecf0b985e381f025188936408f5d5c9f45d0
 #define constant C7  = 0x012ee3ec1e78d470830c61093c2ade370b26c83cc5cebeeddaa6852dbdb09e21
-// #define constant C8  = 1050793453380762984940163090920066886770841063557081906093018330633089036729
-// #define constant C9  = 10665495010329663932664894101216428400933984666065399374198502106997623173873
+#define constant C8  = 0x0252ba5f6760bfbdfd88f67f8175e3fd6cd1c431b099b6bb2d108e7b445bb1b9
+#define constant C9  = 0x179474cceca5ff676c6bec3cef54296354391a8935ff71d6ef5aeaad7ca932f1
 // #define constant C10 = 19965634623406616956648724894636666805991993496469370618546874926025059150737
 // #define constant C11 = 13007250030070838431593222885902415182312449212965120303174723305710127422213
 // #define constant C12 = 16877538715074991604507979123743768693428157847423939051086744213162455276374
@@ -217,6 +217,17 @@
     MIX() // [s1, s0, s1(old), s0(old)]
 }
 
+#define macro PARTIAL_ROUND(const_a, const_b) = takes(2) returns(4) {
+    // input stack: [s1, s0]
+    swap1 // [s0, s1]
+    <const_a> // [C2, s0, s1]
+    NESTED_MULMOD()
+    swap1 // [s1, s0]
+    <const_b> // [C3, s1, s0]
+    add // [s1, s0]
+    MIX()
+}
+
 #define macro MAIN() = takes (0) returns (0) {
     // Poseidon parameters should be t = 2, RF = 8, RP = 56
    
@@ -233,6 +244,10 @@
 
     // ROUND 3 - FULL
     FULL_ROUND(C6, C7)
+    CLEAN_STACK()
+
+    // ROUND 4 - PARTIAL
+    PARTIAL_ROUND(C8, C9)
     CLEAN_STACK()
 
     // return s0 to compare with solidity impl
